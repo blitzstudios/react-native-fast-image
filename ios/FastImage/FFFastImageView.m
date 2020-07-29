@@ -29,6 +29,14 @@
     }
 }
 
+- (void)setLoopCount:(int)loopCount {
+    if (_loopCount != loopCount) {
+        _loopCount = loopCount;
+        self.shouldCustomLoopCount = YES;
+        self.animationRepeatCount = loopCount;
+    }
+}
+
 - (void)setOnFastImageLoadEnd:(RCTDirectEventBlock)onFastImageLoadEnd {
     _onFastImageLoadEnd = onFastImageLoadEnd;
     if (self.hasCompleted) {
