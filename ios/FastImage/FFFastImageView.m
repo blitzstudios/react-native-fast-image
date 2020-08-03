@@ -20,6 +20,7 @@
     self = [super init];
     self.resizeMode = RCTResizeModeCover;
     self.clipsToBounds = YES;
+    self.resetFrameIndexWhenStopped = YES;
     [self addObserver:self forKeyPath:@"currentLoopCount" options:NSKeyValueObservingOptionNew context:nil];
     return self;
 }
@@ -45,8 +46,8 @@
     }
 }
 
-- (void)setLoopCount:(int)loopCount {
-    self.shouldCustomLoopCount = YES;
+- (void)setLoopCount:(NSInteger)loopCount {
+    self.shouldCustomLoopCount = loopCount > 0;
     self.animationRepeatCount = loopCount;
 }
 
@@ -134,6 +135,7 @@
 - (void)reloadImage
 {
     _needsReload = NO;
+    [self stopAnimating];
 
     if (_source) {
 
@@ -200,6 +202,11 @@
             case FFFCacheControlImmutable:
                 break;
         }
+        
+        // Ensure that downloaded images and those pulled from the cache
+        // are SDAnimatedImages. This is necessary to properly route playback
+        // through the SDAnimatedImagePlayer.
+        options |= SDWebImageMatchAnimatedImageClass;
         
         if (self.onFastImageLoadStart) {
             self.onFastImageLoadStart(@{});
