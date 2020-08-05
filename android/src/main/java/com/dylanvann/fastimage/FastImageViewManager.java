@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.request.Request;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
@@ -62,11 +63,14 @@ class FastImageViewManager extends SimpleViewManager<FastImageViewWithUrl> imple
             public void onAnimationEnd(Drawable drawable) {
                 super.onAnimationEnd(drawable);
 
-                WritableMap event = new WritableNativeMap();
-                ThemedReactContext context = (ThemedReactContext) fastImage.getContext();
-                RCTEventEmitter eventEmitter = context.getJSModule(RCTEventEmitter.class);
-                int viewId = fastImage.getId();
-                eventEmitter.receiveEvent(viewId, REACT_ON_ANIMATION_COMPLETE_EVENT, event);
+                // Only fire the event if we are manually controlling loop count.
+                if (fastImage.shouldCustomLoopCount()) {
+                    WritableMap event = new WritableNativeMap();
+                    ThemedReactContext context = (ThemedReactContext) fastImage.getContext();
+                    RCTEventEmitter eventEmitter = context.getJSModule(RCTEventEmitter.class);
+                    int viewId = fastImage.getId();
+                    eventEmitter.receiveEvent(viewId, REACT_ON_ANIMATION_COMPLETE_EVENT, event);
+                }
             }
         });
 
