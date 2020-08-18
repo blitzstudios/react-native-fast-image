@@ -63,8 +63,14 @@ class FastImageViewWithUrl extends AppCompatImageView {
     }
 
     private void _applyLoopCount(GifDrawable drawable, int loopCount) {
+        GifDrawableAccessor.setIsRunning(drawable, false);
+        GifDrawableAccessor.setFrameLoaderIsRunning(drawable, false);
+
         drawable.setLoopCount(loopCount);
         drawable.stop();
         drawable.startFromFirstFrame();
+
+        GifDrawableAccessor.setFrameLoaderIsRunning(drawable, true);
+        GifDrawableAccessor.setIsRunning(drawable, true);
     }
 }
