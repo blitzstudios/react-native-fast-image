@@ -206,7 +206,9 @@
         // Ensure that downloaded images and those pulled from the cache
         // are SDAnimatedImages. This is necessary to properly route playback
         // through the SDAnimatedImagePlayer.
-        options |= SDWebImageMatchAnimatedImageClass;
+        if ([url hasSuffix:@".gif"] || [url hasSuffix:@".webp"]) {
+            options |= SDWebImageMatchAnimatedImageClass;
+        }
         
         if (self.onFastImageLoadStart) {
             self.onFastImageLoadStart(@{});
