@@ -1,19 +1,19 @@
 import React from 'react';
-import { FlexStyle, LayoutChangeEvent, ShadowStyleIOS, StyleProp, TransformsStyle } from 'react-native';
-declare type ResizeMode = 'contain' | 'cover' | 'stretch' | 'center';
+import { FlexStyle, LayoutChangeEvent, ShadowStyleIOS, StyleProp, TransformsStyle, AccessibilityProps } from 'react-native';
+export declare type ResizeMode = 'contain' | 'cover' | 'stretch' | 'center';
 declare const resizeMode: {
     readonly contain: "contain";
     readonly cover: "cover";
     readonly stretch: "stretch";
     readonly center: "center";
 };
-declare type Priority = 'low' | 'normal' | 'high';
+export declare type Priority = 'low' | 'normal' | 'high';
 declare const priority: {
     readonly low: "low";
     readonly normal: "normal";
     readonly high: "high";
 };
-declare type Cache = 'low' | 'normal' | 'high';
+declare type Cache = 'immutable' | 'web' | 'cacheOnly';
 declare const cacheControl: {
     readonly immutable: "immutable";
     readonly web: "web";
@@ -53,7 +53,7 @@ export interface ImageStyle extends FlexStyle, TransformsStyle, ShadowStyleIOS {
     tintColor?: string;
     opacity?: number;
 }
-export interface FastImageProps {
+export interface FastImageProps extends AccessibilityProps {
     source: Source | number;
     resizeMode?: ResizeMode;
     fallback?: boolean;
@@ -98,3 +98,4 @@ interface FastImageStaticProperties {
 }
 declare const FastImage: React.ComponentType<FastImageProps> & FastImageStaticProperties;
 export default FastImage;
+//# sourceMappingURL=index.d.ts.map
