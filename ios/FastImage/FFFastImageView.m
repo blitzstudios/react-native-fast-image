@@ -1,5 +1,6 @@
 #import "FFFastImageView.h"
 #import <SDWebImage/UIImage+MultiFormat.h>
+#import "SDAnimatedImagePlayer.h"
 
 @interface FFFastImageView()
 
@@ -11,6 +12,10 @@
 
 @property (nonatomic, strong) NSDictionary* onLoadEvent;
 
+@end
+
+@interface SDAnimatedImageView ()
+@property (nonatomic,strong) SDAnimatedImagePlayer *player; // The animation player.
 @end
 
 @implementation FFFastImageView
@@ -33,6 +38,11 @@
         if (self.shouldCustomLoopCount &&
             self.currentLoopCount == self.animationRepeatCount &&
             self.onAnimationComplete) {
+            
+            NSUInteger lastFrameIndex = self.player.totalFrameCount - 1;
+            [self.player seekToFrameAtIndex:lastFrameIndex loopCount:0];
+            [self.player pausePlaying];
+            
             self.onAnimationComplete(@{});
         }
     }
