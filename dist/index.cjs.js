@@ -93,6 +93,12 @@ FastImage.priority = priority;
 
 FastImage.preload = sources => FastImageViewNativeModule.preload(sources);
 
+FastImage.removeFromCache = sources => FastImageViewNativeModule.removeFromCache(sources);
+
+FastImage.clearMemoryCache = () => FastImageViewNativeModule.clearMemoryCache();
+
+FastImage.clearDiskCache = () => FastImageViewNativeModule.clearDiskCache();
+
 const styles = reactNative.StyleSheet.create({
   imageContainer: {
     overflow: 'hidden'

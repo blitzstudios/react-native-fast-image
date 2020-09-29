@@ -50,4 +50,11 @@ RCT_EXPORT_METHOD(clearDiskCache:(RCTPromiseResolveBlock)resolve reject:(RCTProm
     }];
 }
 
+RCT_EXPORT_METHOD(removeFromCache:(nonnull NSArray<FFFastImageSource *> *)sources)
+{
+    [sources enumerateObjectsUsingBlock:^(FFFastImageSource * _Nonnull source, NSUInteger idx, BOOL * _Nonnull stop) {
+        [SDImageCache.sharedImageCache removeImageForKey:source.url.absoluteString withCompletion:NULL];
+    }];
+}
+
 @end
