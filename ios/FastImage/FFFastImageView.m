@@ -30,10 +30,6 @@
     return self;
 }
 
--(void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
     if ([keyPath isEqualToString:@"currentLoopCount"]) {
         if (self.shouldCustomLoopCount &&
@@ -269,6 +265,7 @@
 }
 
 - (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self sd_cancelCurrentImageLoad];
 }
 
