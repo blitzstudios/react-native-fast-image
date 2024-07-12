@@ -6,6 +6,7 @@ import android.content.ContextWrapper;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.vectordrawable.graphics.drawable.Animatable2Compat.AnimationCallback;
 
@@ -136,19 +137,99 @@ class FastImageViewManager extends SimpleViewManager<FastImageViewWithUrl> imple
         eventEmitter.receiveEvent(viewId, REACT_ON_LOAD_START_EVENT, new WritableNativeMap());
 
         if (requestManager != null) {
-            requestManager
-                    // This will make this work for remote and local images. e.g.
-                    //    - file:///
-                    //    - content://
-                    //    - res:/
-                    //    - android.resource://
-                    //    - data:image/png;base64
-                    .load(imageSource.getSourceForLoad())
-                    .apply(FastImageViewConverter.getOptions(context, imageSource, source))
-                    .listener(new FastImageRequestListener(key))
-                    .into(new FastImageViewTarget(view));
+            final String url = imageSource.getGlideUrl().toStringUrl();
+            if (!url.startsWith("http")) {
+                requestManager
+                        // This will make this work for remote and local images. e.g.
+                        //    - file:///
+                        //    - content://
+                        //    - res:/
+                        //    - android.resource://
+                        //    - data:image/png;base64
+                        .load(imageSource.getSourceForLoad())
+                        .apply(FastImageViewConverter.getOptions(context, imageSource, source))
+                        .listener(new FastImageRequestListener(key))
+                        .into(view);
+                return;
+            }
+
+            getEtag(url, new EtagCallback() {
+                        @Override
+                        public void onEtag(final String etag) {
+                            getActivityFromContext(view.getContext()).runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    requestManager
+                                            .load(url)
+                                            .apply(FastImageViewConverter.getOptions(context, imageSource, source))
+                                            .signature(new ObjectKey(etag))
+                                            .listener(new FastImageRequestListener(key))
+                                            .into(view);
+                                }
+                            });
+                        }
+                    }
+            );
+            refresh(view, url);
         }
     }
+
+    /**
+     * Returns the etag from cache. If there is no cached etag it will request
+     * the server to get it, save it to the cache, and return it.
+     * @param url
+     * @param callback
+     */
+    private void getEtag(String url, EtagCallback callback) {
+        String etag = ObjectBox.getEtagByUrl(url);
+
+        if (etag == null) {
+            EtagRequester.requestEtag(url, new PersistEtagCallbackWrapper(url, callback));
+        } else {
+            callback.onEtag(etag);
+         }
+     }
+
+    /**
+     * Refreshes an image. Won't do anything if etag hasn't changed.
+     * When there was a new image the new image will be shown + the image
+     * and etag cache will be updated.
+     * @param url
+     */
+    private void refresh(final FastImageViewWithUrl view, final String url) {
+        final String prevEtag = ObjectBox.getEtagByUrl(url);
+        if (prevEtag == null) {
+            //can happen on the very first request. In this case a refresh is useless anyways.
+            return;
+        }
+
+        EtagRequester.requestEtag(url, new PersistEtagCallbackWrapper(url, new EtagCallback() {
+                    @Override
+                    public void onEtag(final String etag) {
+                        getActivityFromContext(view.getContext()).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (requestManager == null) {
+                                    Log.e(FastImageViewManager.class.getSimpleName(), "Can't refresh as requestManager was null!");
+                                    return;
+                                }
+
+                                requestManager
+                                        .load(url)
+                                        .thumbnail(
+                                                requestManager.load(url)
+                                                        .signature(new ObjectKey(prevEtag))
+                                        )
+                                        .signature(new ObjectKey(etag))
+                                        .skipMemoryCache(true)
+                                        .into(view);
+                            }
+                        });
+                    }
+                })
+        );
+    }
+    
 
     @ReactProp(name = "tintColor", customType = "Color")
     public void setTintColor(FastImageViewWithUrl view, @Nullable Integer color) {

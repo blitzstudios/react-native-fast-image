@@ -10,14 +10,17 @@ buildscript {
         repositories {
             google()
             mavenCentral()
+            jcenter()
         }
         dependencies {
             classpath 'com.android.tools.build:gradle:3.5.3'
+            classpath("io.objectbox:objectbox-gradle-plugin:2.8.1")
         }
     }
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'io.objectbox'
 
 android {
     compileSdkVersion safeExtGet('compileSdkVersion', 28)
@@ -27,6 +30,11 @@ android {
         targetSdkVersion safeExtGet('targetSdkVersion', 28)
         versionCode 1
         versionName "1.0"
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [ "objectbox.modelPath" : "schemas/objectbox.json".toString() ]
+            }
+        }
     }
     sourceSets {
         main {
@@ -55,6 +63,7 @@ repositories {
     }
     google()
     mavenCentral()
+    jcenter()
 }
 
 def glideVersion = safeExtGet('glideVersion', '4.12.0')

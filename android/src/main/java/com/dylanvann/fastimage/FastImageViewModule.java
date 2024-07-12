@@ -11,6 +11,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.views.imagehelper.ImageSource;
+import com.dylanvann.fastimage.custom.persistence.ObjectBox;
 
 class FastImageViewModule extends ReactContextBaseJavaModule {
 
@@ -67,6 +68,7 @@ class FastImageViewModule extends ReactContextBaseJavaModule {
             @Override
             public void run() {
                 Glide.get(activity.getApplicationContext()).clearMemory();
+                ObjectBox.removeAll();
                 promise.resolve(null);
             }
         });
@@ -81,6 +83,7 @@ class FastImageViewModule extends ReactContextBaseJavaModule {
         }
 
         Glide.get(activity.getApplicationContext()).clearDiskCache();
+        ObjectBox.removeAll();
         promise.resolve(null);
     }
 }
