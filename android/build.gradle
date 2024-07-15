@@ -1,26 +1,20 @@
-def safeExtGet(prop, fallback) {
-    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
-}
-
 buildscript {
-    // The Android Gradle plugin is only required when opening the android folder stand-alone.
-    // This avoids unnecessary downloads and potential conflicts when the library is included as a
-    // module dependency in an application project.
-    if (project == rootProject) {
-        repositories {
-            google()
-            mavenCentral()
-            jcenter()
-        }
-        dependencies {
-            classpath 'com.android.tools.build:gradle:3.5.3'
-            classpath("io.objectbox:objectbox-gradle-plugin:2.9.1")
-        }
+    repositories {
+        jcenter()
+        google()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:3.5.3"
+        classpath "io.objectbox:objectbox-gradle-plugin:4.0.1"
     }
 }
 
-apply plugin: 'com.android.library'
+apply plugin: "com.android.library"
 apply plugin: 'io.objectbox'
+
+def safeExtGet(prop, fallback) {
+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+}
 
 android {
     compileSdkVersion safeExtGet('compileSdkVersion', 28)
@@ -30,11 +24,6 @@ android {
         targetSdkVersion safeExtGet('targetSdkVersion', 28)
         versionCode 1
         versionName "1.0"
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments = [ "objectbox.modelPath" : "schemas/objectbox.json".toString() ]
-            }
-        }
     }
     sourceSets {
         main {
@@ -63,15 +52,17 @@ repositories {
     }
     google()
     mavenCentral()
-    jcenter()
 }
 
-def glideVersion = safeExtGet('glideVersion', '4.12.0')
+
+def glideVersion = safeExtGet('glideVersion', '4.13.1')
 
 dependencies {
     //noinspection GradleDynamicVersion
     implementation 'com.facebook.react:react-native:+'  // From node_modules
     implementation "com.github.bumptech.glide:glide:${glideVersion}"
     implementation "com.github.bumptech.glide:okhttp3-integration:${glideVersion}"
+    implementation "com.github.bumptech.glide:glide:${glideVersion}"
     annotationProcessor "com.github.bumptech.glide:compiler:${glideVersion}"
 }
+

@@ -1,8 +1,12 @@
 package com.dylanvann.fastimage.custom;
 
+import androidx.annotation.NonNull;
+
 import com.dylanvann.fastimage.custom.persistence.ObjectBox;
 
 import java.io.IOException;
+
+import javax.annotation.Nullable;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -17,12 +21,11 @@ public class EtagRequester {
      * @param url
      * @param callback
      */
-    public static void requestEtag(final String url, final EtagCallback callback) {
-        String prevEtag = ObjectBox.getEtagByUrl(url);
-
+    public static void requestEtag(@NonNull final String url, @Nullable final String prevEtag, @NonNull final EtagCallback callback) {
         OkHttpClient client = SharedOkHttpClient.getInstance(null).getClient();
         Request.Builder request = new Request.Builder()
-                .url(url);
+                .url(url)
+                .head();
 
         if (prevEtag != null) {
             request.addHeader("If-None-Match", prevEtag);
@@ -32,15 +35,24 @@ public class EtagRequester {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
+                // we only want to report an error when we have no etag
+                // and the etag request failed
+                if (prevEtag == null) {
+                    callback.onError("Failure when requesting etag: " + e.getMessage());
+                } else {
+                    callback.onEtag(prevEtag);
+                }
             }
 
             @Override
             public void onResponse(Call call, Response response) {
                 if (response.code() == 200) {
                     String etag = response.header("etag");
-                    if (etag != null) {
-                        callback.onEtag(etag);
-                    }
+                    callback.onEtag(etag);
+                } else if (response.code() > 308) {
+                    callback.onError("Unexpected http code: " + response.code());
+                } else {
+                    callback.onEtag(prevEtag);
                 }
             }
         });

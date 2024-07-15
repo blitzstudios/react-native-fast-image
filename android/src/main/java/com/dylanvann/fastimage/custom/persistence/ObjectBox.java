@@ -4,6 +4,8 @@ import android.content.Context;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
+import io.objectbox.query.Query;
+import io.objectbox.query.QueryBuilder;
 
 public class ObjectBox {
     private static BoxStore boxStore;
@@ -16,36 +18,37 @@ public class ObjectBox {
         }
     }
 
-    public static BoxStore get() { return boxStore; }
+    public static BoxStore get() {
+        return boxStore;
+    }
 
     public static Box<EntityEtagCache> getBoxEtagCache() {
         return get().boxFor(EntityEtagCache.class);
     }
 
     public static EntityEtagCache getEtagCacheEntityByUrl(String url) {
-        return getBoxEtagCache().query().equal(EntityEtagCache_.url, url).build().findFirst();
+        Query<EntityEtagCache> query = getBoxEtagCache().query()
+                                               .equal(EntityEtagCache_.url, url, QueryBuilder.StringOrder.CASE_SENSITIVE)
+                                               .build();
+        return query.findFirst();
     }
 
     public static String getEtagByUrl(String url) {
         EntityEtagCache entry = getEtagCacheEntityByUrl(url);
         if (entry != null) {
-            return entry.etag;
+            return entry.getEtag(); // Ensure getter method for etag field
         }
         return null;
-    }
-
-    public static void removeAll() {
-        getBoxEtagCache().removeAll();
     }
 
     public static void putOrUpdateEtag(String url, String etag) {
         EntityEtagCache entry = getEtagCacheEntityByUrl(url);
         if (entry != null) {
-            entry.etag = etag;
+            entry.setEtag(etag); // Ensure setter method for etag field
         } else {
             entry = new EntityEtagCache();
-            entry.etag = etag;
-            entry.url = url;
+            entry.setEtag(etag); // Ensure setter method for etag field
+            entry.setUrl(url); // Ensure setter method for url field
         }
         getBoxEtagCache().put(entry);
     }
