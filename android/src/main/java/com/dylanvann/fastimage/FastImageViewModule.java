@@ -68,7 +68,6 @@ class FastImageViewModule extends ReactContextBaseJavaModule {
             @Override
             public void run() {
                 Glide.get(activity.getApplicationContext()).clearMemory();
-                ObjectBox.removeAll();
                 promise.resolve(null);
             }
         });

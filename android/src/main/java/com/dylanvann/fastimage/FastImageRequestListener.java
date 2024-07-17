@@ -1,6 +1,7 @@
 package com.dylanvann.fastimage;
 
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
@@ -36,6 +37,8 @@ public class FastImageRequestListener implements RequestListener<Drawable> {
         if (!(target instanceof ImageViewTarget)) {
             return false;
         }
+        Log.e(FastImageRequestListener.class.getSimpleName(), "onLoadFailed");
+
         FastImageViewWithUrl view = (FastImageViewWithUrl) ((ImageViewTarget) target).getView();
         ThemedReactContext context = (ThemedReactContext) view.getContext();
         RCTEventEmitter eventEmitter = context.getJSModule(RCTEventEmitter.class);

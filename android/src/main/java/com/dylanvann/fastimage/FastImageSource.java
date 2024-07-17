@@ -54,6 +54,7 @@ public class FastImageSource extends ImageSource {
         mHeaders = headers == null ? Headers.DEFAULT : headers;
         mUri = super.getUri();
 
+
         if (isResource() && TextUtils.isEmpty(mUri.toString())) {
             throw new Resources.NotFoundException("Local Resource Not Found. Resource: '" + getSource() + "'.");
         }

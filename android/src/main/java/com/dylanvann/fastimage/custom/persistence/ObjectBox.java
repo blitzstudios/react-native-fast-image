@@ -41,6 +41,10 @@ public class ObjectBox {
         return null;
     }
 
+    public static void removeAll() {
+        getBoxEtagCache().removeAll();
+    }
+
     public static void putOrUpdateEtag(String url, String etag) {
         EntityEtagCache entry = getEtagCacheEntityByUrl(url);
         if (entry != null) {

@@ -14,6 +14,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.Headers;
+import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.signature.ObjectKey;
@@ -114,6 +116,7 @@ class FastImageViewManager extends SimpleViewManager<FastImageViewWithUrl> imple
         //final GlideUrl glideUrl = FastImageViewConverter.getGlideUrl(view.getContext(), source);
         final FastImageSource imageSource = FastImageViewConverter.getImageSource(view.getContext(), source);
         final GlideUrl glideUrl = imageSource.getGlideUrl();
+        final FastImageCacheControl cacheControl = FastImageViewConverter.getCacheControl(source);
 
         view.glideUrl = glideUrl;
 
@@ -135,7 +138,8 @@ class FastImageViewManager extends SimpleViewManager<FastImageViewWithUrl> imple
         final RequestOptions options = FastImageViewConverter.getOptions(context, imageSource, source);
         if (requestManager != null) {
             final String url = imageSource.getGlideUrl().toStringUrl();
-            if (!url.startsWith("http")) {
+            final Boolean shouldAttemptEtag = url.startsWith("http") && cacheControl == FastImageCacheControl.WEB;
+            if (!shouldAttemptEtag) {
                 requestManager
                         // This will make this work for remote and local images. e.g.
                         //    - file:///
@@ -150,6 +154,7 @@ class FastImageViewManager extends SimpleViewManager<FastImageViewWithUrl> imple
                 return;
             }
 
+            // Attempt etag loading
             loadImage(view, url, options, key);
         }
     }
@@ -182,6 +187,8 @@ class FastImageViewManager extends SimpleViewManager<FastImageViewWithUrl> imple
         EtagRequester.requestEtag(url, prevEtag, new EtagCallback() {
             @Override
             public void onEtag(String etag) {
+                Log.e(FastImageViewManager.class.getSimpleName(), "onEtag");
+
                 // Note: here at this point the etag in the ObjectBox has been updated
                 // to the new etag. That's why we pass down the the previous reference.
                 loadImageWithSignature(view, url, etag, prevEtag, options, key);
@@ -189,6 +196,8 @@ class FastImageViewManager extends SimpleViewManager<FastImageViewWithUrl> imple
 
             @Override
             public void onError(String error) {
+                Log.e(FastImageViewManager.class.getSimpleName(), "onError");
+
                 loadImageWithSignature(view, url, prevEtag, prevEtag, options, key);
             }
         });
@@ -228,6 +237,8 @@ class FastImageViewManager extends SimpleViewManager<FastImageViewWithUrl> imple
             // thumbnail request. Without this there would be a "white flickering"
             // until the (new) image is loaded.
             if (prevSignature != null) {
+                Log.e(FastImageViewManager.class.getSimpleName(), "Inside Prev Sig. Loading up thumbnail");
+
                 // Create a "thumbnail" which is literally the cached image while we load the new image
                 RequestBuilder<Drawable> thumbnailRequest = requestManager
                         .load(url)
@@ -251,6 +262,8 @@ class FastImageViewManager extends SimpleViewManager<FastImageViewWithUrl> imple
             }
 
             // finally, load the image
+            Log.e(FastImageViewManager.class.getSimpleName(), "Final Loadup" + signature + " , " + url + " , ");
+
             imageRequest.into(view);
         });
     }
