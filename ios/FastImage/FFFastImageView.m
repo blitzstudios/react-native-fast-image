@@ -89,6 +89,10 @@
     }
 }
 
+- (void)setOnClick:(id)sender {
+    // no-op
+}
+
 - (void)setImageColor:(UIColor *)imageColor {
     if (imageColor != nil) {
         _imageColor = imageColor;
